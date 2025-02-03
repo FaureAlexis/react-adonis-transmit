@@ -86,81 +86,49 @@ export function TransmitProvider({
   )
 
   // Subscribe to a channel with reference counting for cleanup
-  const subscribe = useCallback(
-    (channel: string, callback: (event: any) => void) => {
-      if (enableLogging) {
-        console.log('[Transmit] - Subscribing to', channel)
+  const subscribe = useCallback((channel: string, callback: (event: any) => void) => {
+    console.log('[Transmit] - Subscribing to', channel)
+    let sub = subscriptions.current.get(channel)
+    console.log({ sub })
+    if (!sub) {
+      sub = {
+        count: 0,
+        subscription: transmit.subscription(channel)
       }
+      subscriptions.current.set(channel, sub)
+      
+      // Setup global listeners
+      sub.subscription.onMessage((event) => {
+        handleMessage(channel, event)
+        callback(event)
+      })
 
-      let sub = subscriptions.current.get(channel)
-
-      if (!sub) {
-        if (enableLogging) {
-          console.log('[Transmit] - Creating new subscription for', channel)
-        }
-
-        const subscription = transmit.subscription(channel)
-
-        // Set up message handling immediately
-        subscription.onMessage((event) => {
-          handleMessage(channel, event)
-          callback(event)
-        })
-
-        // Create subscription immediately
+      // Await subscription.create
+      ;(async () => {
         try {
-          if (enableLogging) {
-            console.log('[Transmit] - Initializing subscription for', channel)
-          }
-
-          // Create and store the subscription
-          void subscription.forceCreate()
-
-          sub = {
-            count: 0,
-            subscription,
-          }
-          subscriptions.current.set(channel, sub)
-
-          if (enableLogging) {
-            console.log('[Transmit] - Subscription stored for', channel)
-          }
+          await sub.subscription.create()
         } catch (error) {
-          console.error('[Transmit] - Error during subscription setup:', error)
-          throw new Error(`Failed to set up subscription for channel ${channel}`)
+          console.error('Failed to create subscription:', error)
         }
+      })()
+    }
+
+    sub.count++
+    console.log('[Transmit] - Subscribed to', channel)
+    console.log({ sub })
+    // Return unsubscribe function
+    return () => {
+      if (!subscriptions.current.has(channel)) return
+      
+      const sub = subscriptions.current.get(channel)!
+      sub.count--
+      
+      if (sub.count === 0) {
+        sub.subscription.delete()
+        subscriptions.current.delete(channel)
       }
-
-      // Increment reference count
-      sub.count++
-
-      if (enableLogging) {
-        console.log('[Transmit] - Subscription reference count for', channel, ':', sub.count)
-      }
-
-      // Return cleanup function
-      return () => {
-        if (!subscriptions.current.has(channel)) return
-
-        const sub = subscriptions.current.get(channel)!
-        sub.count--
-
-        if (enableLogging) {
-          console.log('[Transmit] - Unsubscribing from', channel, 'count:', sub.count)
-        }
-
-        // Clean up when no more subscribers
-        if (sub.count === 0) {
-          if (enableLogging) {
-            console.log('[Transmit] - Deleting subscription for', channel)
-          }
-          sub.subscription.delete()
-          subscriptions.current.delete(channel)
-        }
-      }
-    },
-    [handleMessage, enableLogging]
-  )
+    }
+  }, [])
 
   return (
     <TransmitContext.Provider value={{ transmit, subscribe }}>
