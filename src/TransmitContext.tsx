@@ -114,7 +114,7 @@ export function TransmitProvider({
           }
 
           // Create and store the subscription
-          void subscription.create()
+          void subscription.forceCreate()
 
           sub = {
             count: 0,
