@@ -16,7 +16,10 @@
     "release": "npm version",
     "release:patch": "npm version patch && git push --follow-tags && npm publish",
     "release:minor": "npm version minor && git push --follow-tags && npm publish",
-    "release:major": "npm version major && git push --follow-tags && npm publish"
+    "release:major": "npm version major && git push --follow-tags && npm publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
@@ -40,14 +43,21 @@
   "homepage": "https://github.com/alexisfaure/react-adonis-transmit#readme",
   "license": "MIT",
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/jest": "^29.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
     "prettier": "^3.0.0",
+    "ts-jest": "^29.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@adonisjs/transmit-client": "^1.0.0",
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "react-test-renderer": "^18.0.0"
   }
 }

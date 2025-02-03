@@ -18,6 +18,7 @@
 - 📝 Built-in logging for easy debugging
 - 📦 Tiny footprint (~3KB gzipped)
 - 💪 Written in TypeScript with full type support
+- 🧪 Thoroughly tested with Jest and React Testing Library
 
 ## 🚀 Installation
 
@@ -127,3 +128,33 @@ This will:
 ## 📝 License
 
 MIT © [Alexis Faure](https://github.com/alexisfaure) 
+
+## 🧪 Testing
+
+The library is thoroughly tested using Jest and React Testing Library. Tests cover:
+
+- Provider initialization
+- Authentication handling
+- Subscription lifecycle
+- Multiple subscriptions to the same channel
+- Error cases
+- Logging functionality
+
+To run the tests:
+
+```bash
+# Run tests once
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+Coverage thresholds are set to 80% for:
+- Branches
+- Functions
+- Lines
+- Statements 
