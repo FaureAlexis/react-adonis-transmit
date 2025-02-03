@@ -13,7 +13,7 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "prettier --write .",
     "prepublishOnly": "npm run build",
-    "release": "npm version",
+    "release": "./scripts/release.sh",
     "release:patch": "npm version patch && git push --follow-tags && npm publish",
     "release:minor": "npm version minor && git push --follow-tags && npm publish",
     "release:major": "npm version major && git push --follow-tags && npm publish",
