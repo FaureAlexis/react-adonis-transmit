@@ -119,7 +119,7 @@ export function TransmitProvider({
         }
       }
     },
-    [handleMessage]
+    []
   )
 
   return (
