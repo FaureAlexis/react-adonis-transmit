@@ -1,6 +1,6 @@
 {
   "name": "react-adonis-transmit",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "React context and hooks for Adonis Transmit",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
