@@ -23,12 +23,16 @@ export function TransmitProvider({
     new Transmit({
       baseUrl,
       beforeSubscribe: (requestInit) => {
+        console.log('Before subscribe', requestInit)
         try {
           const request: TransmitRequest = { headers: {} }
+          console.log('Request', request)
           // Handle authentication through custom function or localStorage
           let token = null
+          console.log('Get access token', getAccessToken)
           if (getAccessToken) {
             token = getAccessToken()
+            console.log('Token', token)
             if (token instanceof Promise) {
               console.warn('[Transmit] getAccessToken returned a Promise, but beforeSubscribe must be synchronous. Token will be ignored.')
               token = null
@@ -36,6 +40,7 @@ export function TransmitProvider({
           } else if (accessTokenKey) {
             token = localStorage.getItem(accessTokenKey)
           }
+          console.log('Token2', token)
 
           if (token) {
             request.headers = {
@@ -44,8 +49,8 @@ export function TransmitProvider({
             }
           }
 
+          console.log('Request', request)
           beforeSubscribe?.(request)
-
           // Apply headers to the actual request
           if (request.headers) {
             requestInit.headers = request.headers
@@ -98,39 +103,51 @@ export function TransmitProvider({
       let sub = subscriptions.current.get(channel)
 
       if (!sub) {
-        const subscription = transmit.subscription(channel)
-        sub = {
-          count: 0,
-          subscription,
-        }
-        subscriptions.current.set(channel, sub)
-
         if (enableLogging) {
-          console.log('[Transmit] - Created new subscription for', channel)
+          console.log('[Transmit] - Creating new subscription for', channel)
         }
 
-        // Set up message handling
+        const subscription = transmit.subscription(channel)
+
+        // Set up message handling immediately
         subscription.onMessage((event) => {
           handleMessage(channel, event)
           callback(event)
         })
 
-        // Create the subscription
-        Promise.resolve().then(async () => {
+        // Create subscription immediately
+        try {
           if (enableLogging) {
-            console.log('[Transmit] - Creating subscription for', channel)
+            console.log('[Transmit] - Initializing subscription for', channel)
           }
-          try {
-            await subscription.create()
-            if (enableLogging) {
-              console.log('[Transmit] - Subscription created successfully for', channel)
+
+          // Create and store the subscription
+          subscription.create().then(
+            () => {
+              if (enableLogging) {
+                console.log('[Transmit] - Subscription created successfully for', channel)
+              }
+            },
+            (error) => {
+              console.error('[Transmit] - Failed to create subscription:', error)
+              // Remove failed subscription
+              subscriptions.current.delete(channel)
             }
-          } catch (error) {
-            console.error('[Transmit] - Failed to create subscription:', error)
-            // Remove failed subscription
-            subscriptions.current.delete(channel)
+          )
+
+          sub = {
+            count: 0,
+            subscription,
           }
-        })
+          subscriptions.current.set(channel, sub)
+
+          if (enableLogging) {
+            console.log('[Transmit] - Subscription stored for', channel)
+          }
+        } catch (error) {
+          console.error('[Transmit] - Error during subscription setup:', error)
+          throw new Error(`Failed to set up subscription for channel ${channel}`)
+        }
       }
 
       // Increment reference count
