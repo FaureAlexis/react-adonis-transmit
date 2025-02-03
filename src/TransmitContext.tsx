@@ -77,7 +77,7 @@ export function TransmitProvider({
         console.log('[Transmit] - Subscribing to', channel)
       }
       let sub = subscriptions.current.get(channel)
-
+      console.log('Sub', sub)
       // Create new subscription if it doesn't exist
       if (!sub) {
         sub = {
@@ -96,6 +96,7 @@ export function TransmitProvider({
         ;(async () => {
           try {
             await sub.subscription.create()
+            console.log('Subscription created', sub.subscription.isCreated)
           } catch (error) {
             console.error('Failed to create subscription:', error)
           }
@@ -104,6 +105,9 @@ export function TransmitProvider({
 
       // Increment reference count
       sub.count++
+
+      console.log('Subscribed to', channel)
+      console.log({sub})
 
       // Return cleanup function
       return () => {
