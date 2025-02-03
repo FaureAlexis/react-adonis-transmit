@@ -11,7 +11,12 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "prettier --write ."
+    "lint": "prettier --write .",
+    "prepublishOnly": "npm run build",
+    "release": "npm version",
+    "release:patch": "npm version patch && git push --follow-tags && npm publish",
+    "release:minor": "npm version minor && git push --follow-tags && npm publish",
+    "release:major": "npm version major && git push --follow-tags && npm publish"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
@@ -24,7 +29,15 @@
     "sse",
     "events"
   ],
-  "author": "",
+  "author": "Alexis Faure",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexisfaure/react-adonis-transmit"
+  },
+  "bugs": {
+    "url": "https://github.com/alexisfaure/react-adonis-transmit/issues"
+  },
+  "homepage": "https://github.com/alexisfaure/react-adonis-transmit#readme",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.0.0",

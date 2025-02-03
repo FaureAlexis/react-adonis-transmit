@@ -99,6 +99,32 @@ We welcome contributions! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 📦 Release Process
+
+To release a new version:
+
+1. Make your changes and commit them
+2. Choose one of the following commands based on the type of release:
+   ```bash
+   # For a patch release (0.0.x)
+   npm run release:patch
+
+   # For a minor release (0.x.0)
+   npm run release:minor
+
+   # For a major release (x.0.0)
+   npm run release:major
+   ```
+
+This will:
+- Update the version in package.json
+- Create a git tag
+- Push changes and tags to GitHub
+- Build the package
+- Publish to npm
+
+> Note: Make sure you're logged in to npm (`npm login`) and have the necessary permissions before publishing.
+
 ## 📝 License
 
 MIT © [Alexis Faure](https://github.com/alexisfaure) 
