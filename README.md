@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Stars](https://img.shields.io/github/stars/FaureAlexis/react-adonis-transmit?style=social) 
 ![NPM](https://img.shields.io/npm/dt/react-adonis-transmit)
+[![CI](https://github.com/FaureAlexis/react-adonis-transmit/actions/workflows/ci.yml/badge.svg)](https://github.com/FaureAlexis/react-adonis-transmit/actions/workflows/ci.yml)
 
 
 ## ✨ Features
@@ -103,27 +104,30 @@ We welcome contributions! Feel free to:
 
 To release a new version:
 
-1. Make your changes and commit them
-2. Choose one of the following commands based on the type of release:
+1. Make sure you have GitHub CLI installed (`brew install gh` on macOS)
+2. Login to GitHub CLI: `gh auth login`
+3. Run one of the following commands:
    ```bash
-   # For a patch release (0.0.x)
-   npm run release:patch
+   # Create a custom version release
+   npm run release 1.2.3
 
-   # For a minor release (0.x.0)
-   npm run release:minor
-
-   # For a major release (x.0.0)
-   npm run release:major
+   # Or use semantic versioning shortcuts
+   npm run release:patch  # 0.0.x
+   npm run release:minor  # 0.x.0
+   npm run release:major  # x.0.0
    ```
 
-This will:
-- Update the version in package.json
-- Create a git tag
-- Push changes and tags to GitHub
-- Build the package
-- Publish to npm
+The release process will:
+- Check for uncommitted changes
+- Update version in package.json
+- Create and push git tag
+- Create GitHub release with auto-generated notes
+- Trigger CI/CD pipeline to:
+  - Run tests across Node.js 18.x and 20.x
+  - Build the package
+  - Publish to npm (on release only)
 
-> Note: Make sure you're logged in to npm (`npm login`) and have the necessary permissions before publishing.
+> Note: Make sure you have the `NPM_TOKEN` secret set in your GitHub repository settings for automatic npm publishing.
 
 ## 📝 License
 
