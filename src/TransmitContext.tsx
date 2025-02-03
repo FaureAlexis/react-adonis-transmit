@@ -12,36 +12,18 @@ const TransmitContext = createContext<TransmitContextValue | null>(null)
 export function TransmitProvider({
   children,
   baseUrl,
-  beforeSubscribe,
   onMessage,
-  accessTokenKey = 'access_token',
-  getAccessToken,
+  authHeader,
   enableLogging = false,
 }: TransmitProviderProps) {
   // Create a persistent Transmit instance
   const transmit = useRef<Transmit>(
     new Transmit({
       baseUrl,
-      beforeSubscribe: (requestInit) => {
-        let token = null;
-        if (getAccessToken) {
-          const accessToken = getAccessToken();
-          if (accessToken instanceof Promise) {
-            console.error("[Transmit] getAccessToken returned a Promise, but beforeSubscribe must be synchronous. Token will be ignored.")
-          } else {
-            token = accessToken;
-          }
-        } else if (accessTokenKey) {
-          token = localStorage.getItem(accessTokenKey);
-        }
-
-        if (token) {
+      beforeSubscribe: (requestInit) => { 
+        if (authHeader) {
           // @ts-ignore
-          requestInit.headers.append('Authorization', `Bearer ${token}`);
-        }
-
-        if (beforeSubscribe) {
-          beforeSubscribe(requestInit);
+          requestInit.headers.append('Authorization', authHeader);
         }
       },
     })
@@ -58,7 +40,7 @@ export function TransmitProvider({
       if (enableLogging) {
         console.log('[Transmit] - Closing connection')
       }
-      transmit.close()
+      // transmit.close()
     }
 
     if (enableLogging) {
@@ -75,15 +57,13 @@ export function TransmitProvider({
   }, [])
 
   // Handle incoming messages and logging
-  const handleMessage = useCallback(
+  const handleMessage = 
     (channel: string, event: any) => {
       if (enableLogging) {
         console.log(`[Transmit] ${channel} message:`, event)
       }
       onMessage?.(channel, event)
-    },
-    [onMessage, enableLogging]
-  )
+    }
 
   // Subscribe to a channel with reference counting for cleanup
   const subscribe = useCallback((channel: string, callback: (event: any) => void) => {

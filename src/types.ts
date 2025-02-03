@@ -31,12 +31,8 @@ export interface TransmitProviderProps {
   baseUrl: string
   /** Enable debug logging */
   enableLogging?: boolean
-  /** Called before each subscription request is made */
-  beforeSubscribe?: (request: TransmitRequest) => void | Promise<void>
   /** Global handler for all messages */
   onMessage?: (channel: string, event: any) => void
-  /** Key used to get the auth token from localStorage */
-  accessTokenKey?: string
-  /** Custom function to get the auth token */
-  getAccessToken?: () => string | null | Promise<string | null>
+  /** Auth header value */
+  authHeader?: string
 } 
