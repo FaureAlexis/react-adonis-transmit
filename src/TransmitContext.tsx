@@ -95,13 +95,16 @@ export function TransmitProvider({
         console.log('Subscription onMessage', sub.subscription.onMessage)
         // Create the subscription
         ;(async () => {
+          console.log('Creating subscription in async function')
           try {
             await sub.subscription.create()
             console.log('Subscription created', sub.subscription.isCreated)
           } catch (error) {
             console.error('Failed to create subscription:', error)
           }
-        })()
+        })().then(() => {
+          console.log('Subscription should be ok mf')
+        })
       }
 
       // Increment reference count
