@@ -4,6 +4,9 @@
 
 [![npm version](https://badge.fury.io/js/react-adonis-transmit.svg)](https://badge.fury.io/js/react-adonis-transmit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Stars](https://img.shields.io/github/stars/FaureAlexis/react-adonis-transmit?style=social) 
+![NPM](https://img.shields.io/npm/dt/react-adonis-transmit)
+
 
 ## ✨ Features
 
