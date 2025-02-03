@@ -67,9 +67,10 @@ export function TransmitProvider({
 
   // Subscribe to a channel with reference counting for cleanup
   const subscribe = useCallback((channel: string, callback: (event: any) => void) => {
-    console.log('[Transmit] - Subscribing to', channel)
+    if (enableLogging) {
+      console.log('[Transmit] - Subscribing to', channel)
+    }
     let sub = subscriptions.current.get(channel)
-    console.log({ sub })
     if (!sub) {
       sub = {
         count: 0,
@@ -94,8 +95,9 @@ export function TransmitProvider({
     }
 
     sub.count++
-    console.log('[Transmit] - Subscribed to', channel)
-    console.log({ sub })
+    if (enableLogging) {
+      console.log('[Transmit] - Subscribed to', channel)
+    }
     // Return unsubscribe function
     return () => {
       if (!subscriptions.current.has(channel)) return
