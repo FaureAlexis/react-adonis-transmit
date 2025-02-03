@@ -11,7 +11,7 @@ export interface TransmitContextValue {
    * Subscribe to a channel and receive events
    * Returns an unsubscribe function that should be called to clean up
    */
-  subscribe: (channel: string, callback: (event: any) => void) => Promise<() => void>
+  subscribe: (channel: string, callback: (event: any) => void) => () => void
 }
 
 /**
