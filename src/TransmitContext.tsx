@@ -18,22 +18,40 @@ export function TransmitProvider({
   getAccessToken,
   enableLogging = false,
 }: TransmitProviderProps) {
-
   // Create a persistent Transmit instance
   const transmit = useRef<Transmit>(
     new Transmit({
       baseUrl,
       beforeSubscribe: (requestInit) => {
-        let token = null
-        // Handle authentication through custom function or localStorage
-        if (getAccessToken) {
-          token = getAccessToken()
-        } else if (accessTokenKey) {
-          token = localStorage.getItem(accessTokenKey)
-        }
-        if (token) {
-          // @ts-ignore
-          requestInit?.headers?.append('Authorization', `Bearer ${token}`)
+        try {
+          const request: TransmitRequest = { headers: {} }
+          // Handle authentication through custom function or localStorage
+          let token = null
+          if (getAccessToken) {
+            token = getAccessToken()
+            if (token instanceof Promise) {
+              console.warn('[Transmit] getAccessToken returned a Promise, but beforeSubscribe must be synchronous. Token will be ignored.')
+              token = null
+            }
+          } else if (accessTokenKey) {
+            token = localStorage.getItem(accessTokenKey)
+          }
+
+          if (token) {
+            request.headers = {
+              ...request.headers,
+              Authorization: `Bearer ${token}`,
+            }
+          }
+
+          beforeSubscribe?.(request)
+
+          // Apply headers to the actual request
+          if (request.headers) {
+            requestInit.headers = request.headers
+          }
+        } catch (error) {
+          console.error('Error in beforeSubscribe:', error)
         }
       },
     })
@@ -76,42 +94,51 @@ export function TransmitProvider({
       if (enableLogging) {
         console.log('[Transmit] - Subscribing to', channel)
       }
+
       let sub = subscriptions.current.get(channel)
-      console.log('Sub', sub)
-      // Create new subscription if it doesn't exist
+
       if (!sub) {
+        const subscription = transmit.subscription(channel)
         sub = {
           count: 0,
-          subscription: transmit.subscription(channel),
+          subscription,
         }
         subscriptions.current.set(channel, sub)
-        console.log('Subscription set', sub)
+
+        if (enableLogging) {
+          console.log('[Transmit] - Created new subscription for', channel)
+        }
 
         // Set up message handling
-        sub.subscription.onMessage((event) => {
+        subscription.onMessage((event) => {
           handleMessage(channel, event)
           callback(event)
         })
-        console.log('Subscription onMessage', sub.subscription.onMessage)
+
         // Create the subscription
-        ;(async () => {
-          console.log('Creating subscription in async function')
-          try {
-            await sub.subscription.create()
-            console.log('Subscription created', sub.subscription.isCreated)
-          } catch (error) {
-            console.error('Failed to create subscription:', error)
+        Promise.resolve().then(async () => {
+          if (enableLogging) {
+            console.log('[Transmit] - Creating subscription for', channel)
           }
-        })().then(() => {
-          console.log('Subscription should be ok mf')
+          try {
+            await subscription.create()
+            if (enableLogging) {
+              console.log('[Transmit] - Subscription created successfully for', channel)
+            }
+          } catch (error) {
+            console.error('[Transmit] - Failed to create subscription:', error)
+            // Remove failed subscription
+            subscriptions.current.delete(channel)
+          }
         })
       }
 
       // Increment reference count
       sub.count++
 
-      console.log('Subscribed to', channel)
-      console.log({sub})
+      if (enableLogging) {
+        console.log('[Transmit] - Subscription reference count for', channel, ':', sub.count)
+      }
 
       // Return cleanup function
       return () => {
@@ -120,14 +147,21 @@ export function TransmitProvider({
         const sub = subscriptions.current.get(channel)!
         sub.count--
 
+        if (enableLogging) {
+          console.log('[Transmit] - Unsubscribing from', channel, 'count:', sub.count)
+        }
+
         // Clean up when no more subscribers
         if (sub.count === 0) {
+          if (enableLogging) {
+            console.log('[Transmit] - Deleting subscription for', channel)
+          }
           sub.subscription.delete()
           subscriptions.current.delete(channel)
         }
       }
     },
-    []
+    [handleMessage, enableLogging]
   )
 
   return (
