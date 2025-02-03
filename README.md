@@ -11,7 +11,7 @@
 - 🎯 Simple and intuitive React hooks API
 - 🔄 Automatic connection management and reconnection
 - 🧮 Smart subscription handling with reference counting
-- 🔒 Flexible authentication options
+- 🔒 Simple authentication handling
 - 📝 Built-in logging for easy debugging
 - 📦 Tiny footprint (~3KB gzipped)
 - 💪 Written in TypeScript with full type support
@@ -33,15 +33,13 @@ function App() {
   return (
     <TransmitProvider 
       baseUrl="http://your-api-url"
-      // Optional: Handle auth token
-      accessTokenKey="access_token"
-      // Or use a custom function to get the token
-      getAccessToken={() => localStorage.getItem('my_token')}
+      // Optional: Add auth header
+      authHeader="Bearer your-token-here"
       // Optional: Handle messages globally
       onMessage={(channel, event) => {
         console.log(`Message from ${channel}:`, event)
       }}
-      // Optional: Enable logging
+      // Optional: Enable debug logging
       enableLogging={true}
     >
       {/* Your app components */}
@@ -79,9 +77,7 @@ function MyComponent() {
 | Prop | Type | Description |
 |------|------|-------------|
 | `baseUrl` | `string` | **Required.** Base URL of your Adonis API |
-| `accessTokenKey` | `string` | Key for auth token in localStorage |
-| `getAccessToken` | `() => string \| null \| Promise<string \| null>` | Custom token retrieval function |
-| `beforeSubscribe` | `(request) => void \| Promise<void>` | Hook to modify requests before subscription |
+| `authHeader` | `string` | Authorization header value (e.g. "Bearer token") |
 | `onMessage` | `(channel, event) => void` | Global message handler |
 | `enableLogging` | `boolean` | Enable debug logging |
 
