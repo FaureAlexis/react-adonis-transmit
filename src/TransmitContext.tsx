@@ -95,7 +95,7 @@ export function TransmitProvider({
 
   // Subscribe to a channel with reference counting for cleanup
   const subscribe = useCallback(
-    (channel: string, callback: (event: any) => void) => {
+    async (channel: string, callback: (event: any) => void) => {
       if (enableLogging) {
         console.log('[Transmit] - Subscribing to', channel)
       }
@@ -122,18 +122,8 @@ export function TransmitProvider({
           }
 
           // Create and store the subscription
-          subscription.create().then(
-            () => {
-              if (enableLogging) {
-                console.log('[Transmit] - Subscription created successfully for', channel)
-              }
-            },
-            (error) => {
-              console.error('[Transmit] - Failed to create subscription:', error)
-              // Remove failed subscription
-              subscriptions.current.delete(channel)
-            }
-          )
+          await subscription.create()
+          console.log('Subscription created', subscription.isCreated)
 
           sub = {
             count: 0,
