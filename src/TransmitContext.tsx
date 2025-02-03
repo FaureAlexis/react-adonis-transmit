@@ -23,27 +23,18 @@ export function TransmitProvider({
   const transmit = useRef<Transmit>(
     new Transmit({
       baseUrl,
-      beforeSubscribe: async (requestInit) => {
-        const request: TransmitRequest = { headers: {} }
+      beforeSubscribe: (requestInit) => {
+        let token = null
         // Handle authentication through custom function or localStorage
         if (getAccessToken) {
-          const token = await getAccessToken()
-          if (token) {
-            request.headers = {
-              ...request.headers,
-              Authorization: `Bearer ${token}`,
-            }
-          }
+          token = getAccessToken()
         } else if (accessTokenKey) {
-          const token = localStorage.getItem(accessTokenKey)
-          if (token) {
-            request.headers = {
-              ...request.headers,
-              Authorization: `Bearer ${token}`,
-            }
-          }
+          token = localStorage.getItem(accessTokenKey)
         }
-        await beforeSubscribe?.(request)
+        if (token) {
+          // @ts-ignore
+          requestInit?.headers?.append('Authorization', `Bearer ${token}`)
+        }
       },
     })
   ).current
