@@ -23,40 +23,25 @@ export function TransmitProvider({
     new Transmit({
       baseUrl,
       beforeSubscribe: (requestInit) => {
-        console.log('Before subscribe', requestInit)
-        try {
-          const request: TransmitRequest = { headers: {} }
-          console.log('Request', request)
-          // Handle authentication through custom function or localStorage
-          let token = null
-          console.log('Get access token', getAccessToken)
-          if (getAccessToken) {
-            token = getAccessToken()
-            console.log('Token', token)
-            if (token instanceof Promise) {
-              console.warn('[Transmit] getAccessToken returned a Promise, but beforeSubscribe must be synchronous. Token will be ignored.')
-              token = null
-            }
-          } else if (accessTokenKey) {
-            token = localStorage.getItem(accessTokenKey)
+        let token = null;
+        if (getAccessToken) {
+          const accessToken = getAccessToken();
+          if (accessToken instanceof Promise) {
+            console.error("[Transmit] getAccessToken returned a Promise, but beforeSubscribe must be synchronous. Token will be ignored.")
+          } else {
+            token = accessToken;
           }
-          console.log('Token2', token)
+        } else if (accessTokenKey) {
+          token = localStorage.getItem(accessTokenKey);
+        }
 
-          if (token) {
-            request.headers = {
-              ...request.headers,
-              Authorization: `Bearer ${token}`,
-            }
-          }
+        if (token) {
+          // @ts-ignore
+          requestInit.headers.append('Authorization', `Bearer ${token}`);
+        }
 
-          console.log('Request', request)
-          beforeSubscribe?.(request)
-          // Apply headers to the actual request
-          if (request.headers) {
-            requestInit.headers = request.headers
-          }
-        } catch (error) {
-          console.error('Error in beforeSubscribe:', error)
+        if (beforeSubscribe) {
+          beforeSubscribe(requestInit);
         }
       },
     })
@@ -69,6 +54,13 @@ export function TransmitProvider({
 
   // Set up connection lifecycle logging
   useEffect(() => {
+    const onUnmount = () => {
+      if (enableLogging) {
+        console.log('[Transmit] - Closing connection')
+      }
+      transmit.close()
+    }
+
     if (enableLogging) {
       transmit.on('connected', () => console.log('[SSE] connected'))
       transmit.on('disconnected', () => console.log('[SSE] disconnected'))
@@ -78,7 +70,7 @@ export function TransmitProvider({
 
     // Clean up on unmount
     return () => {
-      transmit.close()
+      onUnmount()
     }
   }, [])
 
@@ -122,14 +114,7 @@ export function TransmitProvider({
           }
 
           // Create and store the subscription
-          ;(async () => {
-            try {
-              await subscription.create()
-              console.log('Subscription created', subscription.isCreated)
-            } catch (error) {
-              console.error('Failed to create subscription:', error)
-            }
-          })()
+          void subscription.create()
 
           sub = {
             count: 0,

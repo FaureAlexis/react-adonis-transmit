@@ -19,7 +19,7 @@ export interface TransmitContextValue {
  */
 export interface TransmitRequest {
   /** Headers to be sent with the SSE request */
-  headers?: Record<string, string>
+  headers?: HeadersInit
 }
 
 /**
