@@ -85,13 +85,14 @@ export function TransmitProvider({
           subscription: transmit.subscription(channel),
         }
         subscriptions.current.set(channel, sub)
+        console.log('Subscription set', sub)
 
         // Set up message handling
         sub.subscription.onMessage((event) => {
           handleMessage(channel, event)
           callback(event)
         })
-
+        console.log('Subscription onMessage', sub.subscription.onMessage)
         // Create the subscription
         ;(async () => {
           try {
